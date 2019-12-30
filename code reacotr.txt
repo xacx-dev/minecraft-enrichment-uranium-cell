@@ -1,0 +1,211 @@
+VARIABLE $MIN
+VARIABLE $slot
+9200 $MIN !
+: off
+    1 IOXSET
+;
+: on
+	40 TICKS
+	1 IOXRST
+;
+: reprod
+	3 SORTCOLOR!
+		42 20 DO
+	I SORTSLOT@	
+	IF
+		27070 =
+			IF
+				DROP
+				I SORTPULL
+			THEN
+	THEN
+		LOOP
+;
+: inlzh
+16 SORTCOLOR!
+	DO
+		31 SORTSLOT@
+	IF
+			24708 =
+			IF
+				LEAVE
+            ELSE
+				31 SORTPULL
+				32768 IOXSET
+				35 TICKS
+				32768 IOXRST
+			THEN
+	ELSE
+		32768 IOXSET
+		35 TICKS
+		32768 IOXRST
+	THEN
+	LOOP
+;
+: damage_check
+     SORTDMG@ <= IF
+			off
+			1 SORTCOLOR!
+			100 TICKS
+			31 SORTPULL
+            inlzh
+        ELSE
+            2DROP
+    THEN
+;
+: moni
+    31 SORTSLOT@
+	DROP
+			24708 =
+			IF
+				DROP
+				$MIN @ damage_check
+			ELSE
+			   DROP 
+            THEN
+;
+:reprod4x
+3 SORTCOLOR!
+DO
+    $slot @ SORTSLOT@
+        IF
+        22679 =
+            IF
+                LEAVE
+            ELSE
+			off
+            $slot @ SORTPULL
+            THEN
+        ELSE
+          4 IOXSET
+		  35 TICKS
+		  4 IOXRST
+        THE:N
+    LOOP
+;
+: chrod4x
+         22 $slot !
+		 reprod4x
+		 30 $slot !
+		 reprod4x
+		 32 $slot !
+		 reprod4x
+		 40 $slot !
+		 reprod4x
+;
+: start
+    BEGIN
+		reprod
+        moni
+		chrod4x
+
+		on
+		0SP
+    AGAIN
+;﻿
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+VARIABLE $EMT
+VARIABLE $REC
+VARIABLE $CYCLE
+: on
+1 IOXSET 
+3240 TICKS
+1 IOXRST
+;
+: removelzh
+1 SORTSLOT@ 
+18 9 DO
+I SORTPULL
+LOOP
+45 36 DO
+I SORTPULL
+LOOP
+;
+: reloadall
+17 11 DO
+I SORTADDR !
+removelzh
+LOOP
+;
+
+: check
+ CR ." Checking reactor " $REC @ .
+    0 $EMT ! 
+    $REC @ SORTADDR !
+    54 0 DO
+        I SORTSLOT@ 0=
+            IF
+                $EMT @ 1 + $EMT !
+            THEN
+        2DROP
+    LOOP
+    $EMT @
+        IF
+            CR ." Starting stop! not full reactor № " $REC @ .
+            ABORT
+        ELSE
+            CR ." Reactor № " $REC @ . ." is good"
+		
+        THEN
+;
+: chkreactors
+   17 11 DO
+I $REC !
+check
+LOOP
+;
+:start
+0 $CYCLE !
+BEGIN
+$CYCLE @ 1 + $CYCLE !
+CR . " "
+CR ." Cycle # " $CYCLE @ . ." started"
+CR . " "
+chkreactors
+on
+reloadall
+1200 TICKS
+AGAIN
+;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
